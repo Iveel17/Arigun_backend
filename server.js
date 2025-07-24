@@ -1,16 +1,18 @@
-// backend/server.js
+// backend/server.js (ESM version)
 
-require('dotenv').config(); // Load environment variables from .env file
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors'); // Import cors
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Body parser for JSON requests
+app.use(cors());
+app.use(express.json());
 
 // Database Connection
 const mongoURI = process.env.MONGO_URI;
@@ -19,15 +21,15 @@ mongoose.connect(mongoURI)
     .then(() => console.log('MongoDB connected successfully'))
     .catch(err => {
         console.error('MongoDB connection error:', err);
-        process.exit(1); // Exit process with failure
+        process.exit(1);
     });
 
-// Basic route to test server
+// Routes
 app.get('/', (req, res) => {
     res.send('Backend API is running!');
 });
 
-// Start the server
+// Start Server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
