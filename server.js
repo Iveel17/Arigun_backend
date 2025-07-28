@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/authRoutes.js';
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // 🆕 For parsing form data
+app.use(cookieParser());
 
 // Setup __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -39,16 +41,27 @@ app.get('/smoothies', (req, res) => {
 });
 app.use(authRoutes); // make sure authRoutes uses `res.render()`
 
-// MongoDB Connection
-const mongoURI = process.env.MONGO_URI;
-mongoose.connect(mongoURI)
-    .then(() => console.log('MongoDB connected successfully'))
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
-        process.exit(1);
-    });
+// database connection
+const MONGO_URI = process.env.MONGO_URI;
+mongoose.connect(MONGO_URI)
+  .then(() => app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  }))
+  .catch(err => console.error('DB Connection Error:', err));
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+
+// cookie test routes
+app.get('/set-cookies', (req, res) => {
+  res.cookie('newUser', false);
+  res.cookie('isEmployee', true, {
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    httpOnly: true,
+  });
+  res.send('You got the cookies!');
+});
+
+app.get('/read-cookies', (req, res) => {
+  const cookies = req.cookies;
+  console.log('Cookies:', cookies);
+  res.json(cookies);
 });
