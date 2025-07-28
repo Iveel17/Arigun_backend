@@ -8,7 +8,9 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 
+
 import authRoutes from './routes/authRoutes.js';
+import { requireAuth } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -36,9 +38,7 @@ app.use(express.static(path.join(__dirname, 'public'))); // if you have one
 app.get('/', (req, res) => {
     res.render('home');
 });
-app.get('/smoothies', (req, res) => {
-    res.render('smoothies');
-});
+app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
 app.use(authRoutes); // make sure authRoutes uses `res.render()`
 
 // database connection
