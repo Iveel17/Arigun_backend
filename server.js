@@ -49,19 +49,3 @@ mongoose.connect(MONGO_URI)
   }))
   .catch(err => console.error('DB Connection Error:', err));
 
-
-// cookie test routes
-app.get('/set-cookies', (req, res) => {
-  res.cookie('newUser', false);
-  res.cookie('isEmployee', true, {
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    httpOnly: true,
-  });
-  res.send('You got the cookies!');
-});
-
-app.get('/read-cookies', (req, res) => {
-  const cookies = req.cookies;
-  console.log('Cookies:', cookies);
-  res.json(cookies);
-});
