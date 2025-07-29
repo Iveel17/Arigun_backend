@@ -10,7 +10,7 @@ import { fileURLToPath } from 'url';
 
 
 import authRoutes from './routes/authRoutes.js';
-import { requireAuth } from './middleware/authMiddleware.js';
+import { requireAuth, checkUser } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -35,6 +35,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public'))); // if you have one
 
 // Routes
+app.use(checkUser); // Middleware to check user before any route
 app.get('/', (req, res) => {
     res.render('home');
 });

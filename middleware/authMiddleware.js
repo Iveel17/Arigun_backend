@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js'; // Assuming you have a User model defined
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -21,4 +22,23 @@ const requireAuth = (req, res, next) => {
   });
 };
 
-export { requireAuth };
+const checkUser = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decodedToken) => {
+      if (err) {
+        res.locals.user = null;
+        next();
+      } else {
+        let user = await User.findById(decodedToken.id);
+        res.locals.user = user;
+        next();
+      }
+    });
+  } else {
+    res.locals.user = null;
+    next();
+  }
+};
+
+export { requireAuth, checkUser };
