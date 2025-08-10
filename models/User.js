@@ -3,6 +3,18 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: [true, 'Please enter your first name'],
+    trim: true,
+    maxlength: [50, 'First name cannot exceed 50 characters']
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Please enter your last name'],
+    trim: true,
+    maxlength: [50, 'Last name cannot exceed 50 characters']
+  },
   email: {
     type: String,
     required: [true, 'Please enter an email'],
@@ -14,7 +26,19 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please enter a password'],
     minlength: [6, 'Minimum password length is 6 characters']
+  },
+  termsAgreed: {
+    type: Boolean,
+    required: [true, 'You must agree to the terms and conditions'],
+    validate: {
+      validator: function(v) {
+        return v === true;
+      },
+      message: 'You must agree to the terms and conditions'
+    }
   }
+}, {
+  timestamps: true // This adds createdAt and updatedAt fields
 });
 
 // fire a function *before* the document is saved to the database
@@ -27,7 +51,12 @@ userSchema.pre('save', async function () {
 
 // fire a function *after* the document is saved to the database
 userSchema.post('save', function (doc, next) {
-  console.log('🟢 New user was created & saved:', doc);
+  console.log('🟢 New user was created & saved:', {
+    id: doc._id,
+    firstName: doc.firstName,
+    lastName: doc.lastName,
+    email: doc.email
+  });
   next();
 });
 
@@ -43,7 +72,6 @@ userSchema.statics.login = async function(email, password) {
   }
   throw Error('incorrect email');
 };
-
 
 const User = mongoose.model('User', userSchema);
 export default User;
