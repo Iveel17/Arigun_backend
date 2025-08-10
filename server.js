@@ -2,13 +2,14 @@
 
 import express from 'express';
 import mongoose from 'mongoose';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
+import cors from "cors";
 
 
+import apiRoutes from './routes/apiRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import { requireAuth, checkUser } from './middleware/authMiddleware.js';
 
@@ -18,7 +19,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true // if you ever send cookies
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // 🆕 For parsing form data
 app.use(cookieParser());
@@ -40,7 +44,8 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
-app.use(authRoutes); // make sure authRoutes uses `res.render()`
+app.use(apiRoutes); // make sure apiRoutes uses `res.json()`
+app.use(authRoutes);  // for rendering HTML pages like /signup and /login
 
 // database connection
 const MONGO_URI = process.env.MONGO_URI;
