@@ -57,7 +57,6 @@ export const login_get = (req, res) => {
 };
 
 // POST routes
-
 export const signup_post = async (req, res) => {
   const { firstName, lastName, email, password, confirmPassword, termsAgreed } = req.body;
 
@@ -91,8 +90,23 @@ export const signup_post = async (req, res) => {
     });
     
     const token = createToken(user._id);
-    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ user: user._id });
+    res.cookie('jwt', token, { 
+      httpOnly: true, 
+      maxAge: maxAge * 1000,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    
+    // Consistent response format
+    res.status(201).json({ 
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
     
   } catch (err) {
     const errors = handleErrors(err);
@@ -103,11 +117,29 @@ export const signup_post = async (req, res) => {
 export const login_post = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.login(email, password); // your User model login method
+    const user = await User.login(email, password);
     const token = createToken(user._id);
-    res.status(200).json({ token, user: user._id });
+    
+    res.cookie('jwt', token, { 
+      httpOnly: true, 
+      maxAge: maxAge * 1000,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+    
+    // Consistent response format - matches signup
+    res.status(200).json({ 
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const errors = handleErrors(error);
+    res.status(400).json({ errors });
   }
 };
 
@@ -118,20 +150,28 @@ export const logout_get = (req, res) => {
 
 export const logout_post = (req, res) => {
   res.cookie('jwt', '', { maxAge: 1 });
-  res.status(200).json({ message: 'Logged out successfully' });
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
 export const me_get = async (req, res) => {
   const token = req.cookies.jwt;
   if (!token) {
-    return res.status(401).json({ user: null });
+    return res.status(401).json({ success: false, user: null });
   }
 
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decodedToken.id).select('-password');
-    res.status(200).json({ user });
+    res.status(200).json({ 
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
   } catch (err) {
-    res.status(401).json({ user: null });
+    res.status(401).json({ success: false, user: null });
   }
 };
