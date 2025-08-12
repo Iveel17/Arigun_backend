@@ -72,7 +72,7 @@ export const signup_post = async (req, res) => {
     }
 
     // Server-side validation for terms agreement
-    if (!termsAgreed || termsAgreed !== 'true') {
+    if (!termsAgreed || termsAgreed !== true) {
       return res.status(400).json({ 
         errors: { 
           ...Object.fromEntries(Object.keys({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', termsAgreed: '' }).map(key => [key, ''])),
@@ -100,6 +100,7 @@ export const signup_post = async (req, res) => {
     // Consistent response format
     res.status(201).json({ 
       success: true,
+      token,
       user: {
         id: user._id,
         firstName: user.firstName,
@@ -130,6 +131,7 @@ export const login_post = async (req, res) => {
     // Consistent response format - matches signup
     res.status(200).json({ 
       success: true,
+      token,
       user: {
         id: user._id,
         firstName: user.firstName,
