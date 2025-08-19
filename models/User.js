@@ -61,14 +61,7 @@ const userSchema = new mongoose.Schema({
   },
   // Optional: Add role-specific metadata
   teacherData: {
-    department: String,
-    subjects: [String],
-    isVerified: { type: Boolean, default: false }
-  },
-  adminData: {
-    permissions: [String],
-    canManageUsers: { type: Boolean, default: false },
-    canManageContent: { type: Boolean, default: false }
+    department: String
   }
 }, {
   timestamps: true
@@ -133,7 +126,7 @@ userSchema.statics.getGuestUser = function() {
   };
 };
 
-// fire a function *before* the document is saved to the database
+// hashes the password, *before* the document is saved to the db
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
@@ -141,7 +134,7 @@ userSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// fire a function *after* the document is saved to the database
+// DEBUG fire a function *after* the document is saved to the database
 userSchema.post('save', function (doc, next) {
   console.log('🟢 New user was created & saved:', {
     id: doc._id,
