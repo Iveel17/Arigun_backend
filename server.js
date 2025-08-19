@@ -10,8 +10,7 @@ import cors from "cors";
 
 
 import apiRoutes from './routes/apiRoutes.js';
-import authRoutes from './routes/authRoutes.js';
-import { requireAuth, checkUser } from './middleware/authMiddleware.js';
+import { requireAuth } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -31,22 +30,10 @@ app.use(cookieParser());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// View Engine Setup (EJS)
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-
 // Static files (optional if using CSS, images, etc.)
 app.use(express.static(path.join(__dirname, 'public'))); // if you have one
 
-// Routes
-app.use(checkUser); // Middleware to check user before any route
-app.get('/', (req, res) => {
-    res.render('home');
-});
-app.get('/smoothies', requireAuth, (req, res) => res.render('smoothies'));
 app.use(apiRoutes); // make sure apiRoutes uses `res.json()`
-app.use(authRoutes);  // for rendering HTML pages like /signup and /login
-
 // database connection
 const MONGO_URI = process.env.MONGO_URI;
 mongoose.connect(MONGO_URI)
