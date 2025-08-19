@@ -1,35 +1,38 @@
-// routes/apiRoutes.js - Enhanced with role-based protection
+// routes/apiRoutes.js
 import { Router } from 'express';
 import * as authController from '../controllers/authController.js';
 import { 
-  requireAuth, 
-  requireRole, 
-  requirePermission,
   createProtectedRoute 
 } from '../middleware/authMiddleware.js';
 import { ROLES } from '../models/User.js';
 
 const router = Router();
 
-// Public routes (no authentication required)
+/* ================================
+   Public Authentication Routes
+   ================================ */
 router.post('/api/auth/signup', authController.signup_post);
 router.post('/api/auth/login', authController.login_post);
 router.post('/api/auth/logout', authController.logout_post);
-router.get('/api/auth/me', authController.me_get); // This handles guest users
 
-// Protected routes - User level and above
-router.get('/api/profile', 
+/* ================================
+   User Routes
+   ================================ */
+// Cart route (protected, USER role)
+router.get('/api/cart',  
   ...createProtectedRoute([ROLES.USER]), 
   (req, res) => {
     res.json({ 
       success: true, 
       user: req.user,
-      message: 'User profile accessed' 
+      message: 'User cart accessed' 
     });
   }
 );
 
-// Protected routes - Teacher level and above
+/* ================================
+   Teacher Routes
+   ================================ */
 router.get('/api/teacher/dashboard', 
   ...createProtectedRoute([ROLES.TEACHER]), 
   (req, res) => {
@@ -41,8 +44,9 @@ router.get('/api/teacher/dashboard',
   }
 );
 
+// Example of teacher course creation (if only teachers can create)
 router.post('/api/courses', 
-  ...createProtectedRoute([], ['create_courses']), 
+  ...createProtectedRoute([ROLES.TEACHER]), 
   (req, res) => {
     // Course creation logic here
     res.json({ 
@@ -53,7 +57,9 @@ router.post('/api/courses',
   }
 );
 
-// Protected routes - Admin only
+/* ================================
+   Admin Routes
+   ================================ */
 router.post('/api/auth/update-role', 
   ...createProtectedRoute([ROLES.ADMIN]), 
   authController.update_user_role
@@ -75,14 +81,16 @@ router.get('/api/admin/dashboard',
   }
 );
 
-// Example of mixed permission routes
+/* ================================
+   Mixed / Guest Accessible Routes
+   ================================ */
 router.get('/api/content', 
-  requireAuth(true), // Allow guests
+  ...createProtectedRoute([], [], true), // allowGuest=true
   (req, res) => {
     const content = {
       public: 'This content is available to everyone',
-      user: req.user.hasPermission('read_courses') ? 'Course list available' : null,
-      teacher: req.user.hasPermission('create_courses') ? 'Course creation available' : null,
+      user: req.user.hasRole(ROLES.USER) ? 'Course list available' : null,
+      teacher: req.user.hasRole(ROLES.TEACHER) ? 'Course creation available' : null,
       admin: req.user.hasRole(ROLES.ADMIN) ? 'Admin panel available' : null
     };
     
@@ -94,10 +102,12 @@ router.get('/api/content',
   }
 );
 
-// Example route that checks ownership or admin access
+/* ================================
+   Ownership / Resource-based Access
+   ================================ */
 router.get('/api/user/:userId/profile', 
-  requireAuth(),
-  async (req, res) => {
+  ...createProtectedRoute([ROLES.USER, ROLES.TEACHER, ROLES.ADMIN]), 
+  (req, res) => {
     const requestedUserId = req.params.userId;
     
     // Allow access if user is admin or accessing their own profile
@@ -108,7 +118,6 @@ router.get('/api/user/:userId/profile',
       });
     }
     
-    // Profile access logic here
     res.json({ 
       success: true, 
       message: `Profile access granted for user ${requestedUserId}`,
@@ -117,7 +126,9 @@ router.get('/api/user/:userId/profile',
   }
 );
 
-// Health check endpoint (public)
+/* ================================
+   Health Check Route (Public)
+   ================================ */
 router.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
