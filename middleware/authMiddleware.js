@@ -116,18 +116,18 @@ const requireOwnershipOrAdmin = (getResourceUserId) => {
   };
 };
 
-// Utility function to create route protection combinations
-const createProtectedRoute = (roles = [], permissions = [], allowGuest = false) => {
+// Utility function to create route protection combinations - FIXED VERSION
+const createProtectedRoute = (roles = [], allowGuest = false) => {
   const middlewares = [requireAuth(allowGuest)];
   
   if (roles.length > 0) {
     middlewares.push(requireRole(...roles));
   }
   
-  
   return middlewares;
 };
 
+// ✅ FIXED: Proper export with all functions
 export { 
   requireAuth, 
   requireRole, 

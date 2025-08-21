@@ -58,10 +58,6 @@ const userSchema = new mongoose.Schema({
       },
       message: 'You must agree to the terms and conditions'
     }
-  },
-  // Optional: Add role-specific metadata
-  teacherData: {
-    department: String
   }
 }, {
   timestamps: true
@@ -70,42 +66,6 @@ const userSchema = new mongoose.Schema({
 // Instance method to check if user has required role or higher
 userSchema.methods.hasRole = function(requiredRole) {
   return ROLE_HIERARCHY[this.role] >= ROLE_HIERARCHY[requiredRole];
-};
-
-// Instance method to check if user has specific permission
-userSchema.methods.hasPermission = function(permission) {
-  switch (this.role) {
-    case ROLES.ADMIN:
-      return true; // Admin has all permissions
-    case ROLES.TEACHER:
-      // Define teacher permissions
-      const teacherPermissions = [
-        'read_courses',
-        'create_courses',
-        'update_own_courses',
-        'delete_own_courses',
-        'manage_students',
-        'grade_assignments'
-      ];
-      return teacherPermissions.includes(permission);
-    case ROLES.USER:
-      // Define user permissions
-      const userPermissions = [
-        'read_courses',
-        'enroll_courses',
-        'view_own_profile',
-        'update_own_profile'
-      ];
-      return userPermissions.includes(permission);
-    case ROLES.GUEST:
-      // Define guest permissions
-      const guestPermissions = [
-        'view_public_content'
-      ];
-      return guestPermissions.includes(permission);
-    default:
-      return false;
-  }
 };
 
 // Static method to get default guest user object

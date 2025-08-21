@@ -1,6 +1,6 @@
 // controllers/authController.js
 import AuthService from '../services/authService.js';
-import { ROLES } from '../models/User.js';
+import User, { ROLES } from '../models/User.js'; // ✅ FIXED: Added missing User import
 
 // Helper to format user for response
 const formatUserResponse = (user) => ({
@@ -121,7 +121,7 @@ export const get_all_users = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      users,
+      users: users.map(formatUserResponse), // ✅ IMPROVED: Format all users consistently
       pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) }
     });
   } catch (err) {

@@ -33,7 +33,7 @@ const __dirname = path.dirname(__filename);
 // Static files (optional if using CSS, images, etc.)
 app.use(express.static(path.join(__dirname, 'public'))); // if you have one
 
-app.use('/api/auth', apiRoutes); // make sure apiRoutes uses `res.json()`
+app.use('/', apiRoutes); // make sure apiRoutes uses `res.json()`
 // database connection
 const MONGO_URI = process.env.MONGO_URI;
 mongoose.connect(MONGO_URI)
