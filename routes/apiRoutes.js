@@ -1,8 +1,9 @@
 // routes/apiRoutes.js
 import { Router } from 'express';
 import * as authController from '../controllers/authController.js';
+import { verify_user } from '../controllers/authController.js';
 import { 
-  createProtectedRoute 
+  createProtectedRoute, requireAuth 
 } from '../middleware/authMiddleware.js';
 import { ROLES } from '../models/User.js';
 
@@ -14,6 +15,7 @@ const router = Router();
 router.post('/api/auth/signup', authController.signup_post);
 router.post('/api/auth/login', authController.login_post);
 router.post('/api/auth/logout', authController.logout_post);
+router.get('/verify', requireAuth(), verify_user);
 
 /* ================================
    User Routes

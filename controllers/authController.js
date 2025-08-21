@@ -58,6 +58,30 @@ export const logout_post = (req, res) => {
   res.status(200).json(result);
 };
 
+// Verification
+export const verify_user = async (req, res) => {
+  try {
+    // The requireAuth middleware should have already set req.user
+    if (!req.user || req.user.role === 'guest') {
+      return res.status(401).json({ 
+        success: false, 
+        user: null 
+      });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      user: formatUserResponse(req.user) 
+    });
+  } catch (err) {
+    console.error('Verify user error:', err);
+    res.status(500).json({ 
+      success: false, 
+      user: null 
+    });
+  }
+};
+
 // Update user role (Admin only)
 export const update_user_role = async (req, res) => {
   try {
