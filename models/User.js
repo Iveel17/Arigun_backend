@@ -2,6 +2,9 @@ import mongoose from 'mongoose';
 import validator from 'validator';
 import bcrypt from 'bcrypt';
 
+// DONT TOUCH ⚠️
+
+
 // Define available roles
 export const ROLES = {
   GUEST: 'guest',
@@ -17,7 +20,17 @@ export const ROLE_HIERARCHY = {
   [ROLES.TEACHER]: 2,
   [ROLES.ADMIN]: 3
 };
-
+// Permissions mapped to minimum required role
+export const PERMISSIONS = {
+  'read items': ROLES.GUEST,
+  'access public sections': ROLES.GUEST,
+  'access cart, notification sections': ROLES.USER,
+  'add courses': ROLES.TEACHER,
+  'can access plus section': ROLES.TEACHER,
+  'delete items': ROLES.ADMIN,
+  'update items': ROLES.ADMIN
+  // Add more as needed, e.g., 'manage users': ROLES.ADMIN for exclusive admin stuff
+};
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -63,12 +76,24 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// DONT TOUCH ⚠️
+
+
 // Instance method to check if user has required role or higher
 userSchema.methods.hasRole = function(requiredRole) {
   return ROLE_HIERARCHY[this.role] >= ROLE_HIERARCHY[requiredRole];
 };
 
-// Static method to get default guest user object
+// Checks permission.Hierarchy for cumulative checks
+userSchema.methods.hasPermission = function(permission) {
+  if (!PERMISSIONS[permission]) {
+    return false;  // Undefined permission defaults to denied
+  }
+  const requiredRole = PERMISSIONS[permission];
+  return this.hasRole(requiredRole) && this.isActive;  // Also checks if active
+};
+
+// GET GUEST USER
 userSchema.statics.getGuestUser = function() {
   return {
     id: null,
@@ -76,15 +101,21 @@ userSchema.statics.getGuestUser = function() {
     lastName: 'User',
     email: null,
     role: ROLES.GUEST,
+    isActive: true,  // Guests are always "active"
     hasRole: function(requiredRole) {
       return ROLE_HIERARCHY[ROLES.GUEST] >= ROLE_HIERARCHY[requiredRole];
     },
     hasPermission: function(permission) {
-      const guestPermissions = ['view_public_content'];
-      return guestPermissions.includes(permission);
+      if (!PERMISSIONS[permission]) {
+        return false;
+      }
+      const requiredRole = PERMISSIONS[permission];
+      return ROLE_HIERARCHY[ROLES.GUEST] >= ROLE_HIERARCHY[requiredRole];
     }
   };
 };
+
+// DONT TOUCH ⚠️
 
 // hashes the password, *before* the document is saved to the db
 userSchema.pre('save', async function () {
@@ -118,6 +149,8 @@ userSchema.statics.login = async function(email, password) {
   }
   throw Error('incorrect email');
 };
+
+// DONT TOUCH ⚠️
 
 const User = mongoose.model('User', userSchema);
 export default User;
