@@ -25,6 +25,8 @@ export const PERMISSIONS = {
   'read items': ROLES.GUEST,
   'access public sections': ROLES.GUEST,
   'access cart, notification sections': ROLES.USER,
+  'enroll in courses': ROLES.USER,
+  'view enrollments': ROLES.USER,
   'add courses': ROLES.TEACHER,
   'can access plus section': ROLES.TEACHER,
   'delete items': ROLES.ADMIN,

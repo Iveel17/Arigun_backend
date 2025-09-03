@@ -85,25 +85,26 @@ export const verify_user = async (req, res) => {
 // Update user role (Admin only)
 export const update_user_role = async (req, res) => {
   try {
-    const { userId, newRole } = req.body;
+    // ✅ MODIFIED: Get userId from URL parameters, newRole from the body
+    const { userId } = req.params;
+    const { newRole } = req.body;
 
+    // This is business logic, NOT primary authorization. It's perfectly placed.
     if (!Object.values(ROLES).includes(newRole)) {
       return res.status(400).json({ success: false, message: 'Invalid role specified' });
     }
 
+    // This is also a great example of specific logic within a controller.
     if (req.user.id === userId && newRole !== ROLES.ADMIN) {
       return res.status(403).json({ success: false, message: 'Admins cannot change their own role' });
     }
 
     const user = await User.findByIdAndUpdate(userId, { role: newRole }, { new: true }).select('-password');
-
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-
     res.status(200).json({ success: true, user: formatUserResponse(user), message: `User role updated to ${newRole}` });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: 'Error updating user role' });
   }
 };

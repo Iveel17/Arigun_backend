@@ -54,8 +54,7 @@ router.get('/api/public/courses', ...protectRoute.public(), (req, res) => {
    User-Level Routes (USER+)
    ================================ */
 // Users can enroll in courses
-router.post('/api/courses/:courseId/enroll', 
-  ...protectRoute.user(),
+router.post('/api/courses/:courseId/enroll',
   ...protectRoute.withPermission(PERMISSIONS['enroll in courses']),
   (req, res) => {
     res.json({ 
@@ -68,7 +67,6 @@ router.post('/api/courses/:courseId/enroll',
 
 // Users can view their enrollments
 router.get('/api/user/enrollments', 
-  ...protectRoute.user(),
   ...protectRoute.withPermission(PERMISSIONS['view enrollments']),
   (req, res) => {
     res.json({ 
@@ -146,9 +144,9 @@ router.get('/api/test/my-role', ...protectRoute.public(), (req, res) => {
       role: req.user.role,
       isGuest: req.user.role === ROLES.GUEST,
       permissions: {
-        canCreateCourses: req.user.hasRole(ROLES.TEACHER),
-        canManageUsers: req.user.hasRole(ROLES.ADMIN),
-        canEnrollInCourses: req.user.hasRole(ROLES.USER)
+        canCreateCourses: req.user.hasPermission('add courses'),
+        canManageUsers: req.user.hasPermission('update items'), // Or another admin-specific permission
+        canEnrollInCourses: req.user.hasPermission('enroll in courses')
       }
     }
   });
