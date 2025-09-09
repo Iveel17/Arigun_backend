@@ -17,7 +17,7 @@ router.post('/api/auth/logout', authController.logout_post);
 /* ================================
    User Verification (Protected)
    ================================ */
-router.get('/api/auth/verify', ...protectRoute.user(), verify_user);
+router.get('/api/auth/verify', ...protectRoute.public(), verify_user);
 
 /* ================================
    User Profile Routes
