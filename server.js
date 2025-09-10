@@ -10,7 +10,7 @@ import cors from "cors";
 
 
 import apiRoutes from './routes/apiRoutes.js';
-import { requireAuth } from './middleware/authMiddleware.js';
+import videoRoutes from './routes/videoRoutes.js';
 
 dotenv.config();
 
@@ -31,9 +31,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Static files (optional if using CSS, images, etc.)
-app.use(express.static(path.join(__dirname, 'public'))); // if you have one
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // for video uploads
 
 app.use('/', apiRoutes); // make sure apiRoutes uses `res.json()`
+app.use('/videos', videoRoutes); // video routes
+
 // database connection
 const MONGO_URI = process.env.MONGO_URI;
 mongoose.connect(MONGO_URI)
